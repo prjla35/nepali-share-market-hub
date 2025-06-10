@@ -6,23 +6,22 @@ import pandas as pd
 def get_article_content(url, headers):
     """
     Visits a single article URL and robustly extracts the main text content
-    using the correct ID selector found from the diagnostic file.
+    using the specific and reliable ID selector '#newsdetail-content'.
     """
     try:
         article_response = requests.get(url, headers=headers, timeout=10)
         article_response.raise_for_status()
         article_soup = BeautifulSoup(article_response.content, 'html.parser')
         
-        # --- THE CORRECTED SELECTOR ---
-        # We are now targeting the div with the specific ID 'newsdetail-content'.
-        # The '#' symbol is used to select by ID.
+        # --- Using the more reliable ID selector from your target code ---
+        # The '#' symbol selects by ID, which is less likely to change than a class.
         content_div = article_soup.select_one('#newsdetail-content')
         
         if content_div:
-            # Use .get_text() to extract all text from the found element.
+            # .get_text() is more effective as it extracts all text from within the div,
+            # and separator='\n' preserves line breaks for better readability.
             return content_div.get_text(separator='\n', strip=True)
         else:
-            # This message will now only appear if the website makes a major change.
             return "FAILURE: Could not find the '#newsdetail-content' block on the article page."
             
     except requests.exceptions.RequestException as e:
@@ -51,7 +50,8 @@ def scrape_upcoming_ipos():
         return "Could not find any articles on the main list page. The website layout may have changed."
 
     ipo_data = []
-    # Limiting to the first 5 articles to keep scraping fast
+    
+    # --- Limiting to the first 5 articles to keep scraping fast and efficient ---
     for article_div in articles_list[:5]:
         title_tag = article_div.find('h4', class_='featured-news-title')
         link_tag = article_div.find('a')
@@ -62,12 +62,19 @@ def scrape_upcoming_ipos():
             link = link_tag['href']
             date = date_tag.get_text(strip=True)
             
-            # Use the final, corrected function to get the full article content
+            print(f"Deep scraping content for: {title}")
+            # Use the robust helper function to get the full article content
             article_text = get_article_content(link, headers)
             
-            ipo_data.append({"title": title, "date": date, "link": link, "content": article_text})
+            # Append the complete record in a single pass
+            ipo_data.append({
+                "title": title, 
+                "date": date, 
+                "link": link, 
+                "content": article_text
+            })
 
     if not ipo_data:
-        return "Found article containers, but could not extract article details."
+        return "Found article containers, but could not extract any article details."
 
     return pd.DataFrame(ipo_data)
