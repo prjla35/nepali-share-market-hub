@@ -1,0 +1,8 @@
+streamlit
+requests
+beautifulsoup4
+groq
+pandas
+deep-translator
+# Special instruction to install the nepse library directly from GitHub
+git+https://github.com/basic-bgnr/NepseUnofficialApi
