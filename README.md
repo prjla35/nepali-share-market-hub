@@ -77,10 +77,12 @@ streamlit run app.py
 ├── requirements.txt # Lists all Python dependencies for the project
 ```
 
-### Acknowledgments
+## Acknowledgments
 
 #### ShareSansar for being a valuable public source of financial news and IPO data.
 
 #### The developers of the Nepse Unofficial API.
 
+
+## Note: Most of the code was written by AI (gemini) and There are many errors in the program. Donot take this project seriously as it was just a hobby project which was created in less than 4 hours. 
 
