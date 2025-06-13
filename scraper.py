@@ -1,4 +1,3 @@
-# scraper.py
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -13,13 +12,13 @@ def get_article_content(url, headers):
         article_response.raise_for_status()
         article_soup = BeautifulSoup(article_response.content, 'html.parser')
         
-        # --- Using the more reliable ID selector from your target code ---
-        # The '#' symbol selects by ID, which is less likely to change than a class.
+        # Using the more reliable ID selector from your target code
+        # the '#' symbol selects by ID, which is less likely to change than a class
         content_div = article_soup.select_one('#newsdetail-content')
         
         if content_div:
             # .get_text() is more effective as it extracts all text from within the div,
-            # and separator='\n' preserves line breaks for better readability.
+            # and separator='\n' preserves line breaks for better readability
             return content_div.get_text(separator='\n', strip=True)
         else:
             return "FAILURE: Could not find the '#newsdetail-content' block on the article page."
