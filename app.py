@@ -5,7 +5,7 @@ import json
 from datetime import datetime, timedelta
 from deep_translator import GoogleTranslator
 
-# Import your custom modules
+# project modules
 from scraper import scrape_upcoming_ipos
 from market_data import get_market_data, get_all_companies, get_company_details
 from analysis import (
@@ -15,13 +15,13 @@ from analysis import (
     get_chat_response
 )
 
-# --- Page Configuration ---
+# Streamlit config
 st.set_page_config(
     page_title="Nepal Stock Market Hub",
     layout="wide"
 )
 
-# --- Initialize Session State for Chat, Rate Limiting, and Context ---
+# Session state stuff (for chat history, rate limit, etc.)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "last_query_time" not in st.session_state:
@@ -31,17 +31,20 @@ if "query_count" not in st.session_state:
 if "current_context" not in st.session_state:
     st.session_state.current_context = None
 
-# --- Caching Functions ---
+# Cache functions (so we don't overload APIs every time)
 @st.cache_data(ttl=600)
 def cached_scrape_ipos(): return scrape_upcoming_ipos()
+
 @st.cache_data(ttl=300)
 def cached_get_market_data(): return get_market_data()
+
 @st.cache_data(ttl=3600)
 def cached_get_all_companies(): return get_all_companies()
+
 @st.cache_data(ttl=300)
 def cached_get_company_details(symbol): return get_company_details(symbol)
 
-# --- Translation Function ---
+# Translation helper (simple but works fine)
 @st.cache_data
 def translate_text(text, dest_lang='en'):
     if not text or not isinstance(text, str) or dest_lang == 'en':
@@ -52,7 +55,7 @@ def translate_text(text, dest_lang='en'):
         print(f"Translation Error: {e}")
         return text
 
-# --- Sidebar Navigation ---
+# Sidebar UI
 with st.sidebar:
     st.header(translate_text("Navigation", "ne" if st.session_state.get('language') == 'नेपाली' else 'en'))
     st.selectbox(translate_text("भाषा / Language", "ne" if st.session_state.get('language') == 'नेपाली' else 'en'), ["English", "नेपाली"], key='language')
@@ -75,10 +78,9 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
     st.info(translate_text(
-        "This application uses AI and unofficial APIs for data analysis. "
-        "All information is for educational purposes only. Always conduct your own research before investing.", lang_code))
+        "This app uses AI + unofficial APIs. Info here is educational only, do your own research before investing.", lang_code))
 
-# --- UI Helper Function ---
+# reusable function for displaying dataframes
 def display_styled_dataframe(df):
     if df.empty: return
     column_rename_map = {
@@ -91,14 +93,12 @@ def display_styled_dataframe(df):
     df_display = df.copy().rename(columns=lambda x: column_rename_map.get(x, x))
     st.dataframe(df_display, use_container_width=True, hide_index=True)
 
-# ==============================================================================
-#                      MAIN APPLICATION PAGE LOGIC
-# ==============================================================================
+# Main app pages:
 
 if page == "Market Overview":
     st.session_state.current_context = None
     st.title(translate_text("Market Overview", lang_code))
-    st.text(translate_text("A real-time snapshot of the Nepal Stock Exchange.", lang_code))
+    st.text(translate_text("Real-time NEPSE snapshot", lang_code))
     
     market_data = cached_get_market_data()
     
@@ -107,7 +107,7 @@ if page == "Market Overview":
     else:
         with st.container(border=True):
             st.subheader(translate_text("Today's AI Market Briefing", lang_code))
-            with st.spinner(translate_text("Our AI analyst is studying the market...", lang_code)):
+            with st.spinner(translate_text("AI analyzing the market...", lang_code)):
                 market_summary = get_market_summary_from_data(market_data['gainers'], market_data['losers'], market_data['turnover'])
                 st.markdown(translate_text(market_summary, lang_code))
         
@@ -136,9 +136,9 @@ if page == "Market Overview":
 
 elif page == "IPO Center":
     st.title(translate_text("IPO Center", lang_code))
-    st.text(translate_text("Latest Initial Public Offering announcements and AI-powered analysis.", lang_code))
+    st.text(translate_text("Latest IPOs + AI-powered analysis", lang_code))
     
-    with st.spinner(translate_text("Performing deep scrape for latest IPO announcements...", lang_code)):
+    with st.spinner(translate_text("Scraping latest IPO announcements...", lang_code)):
         ipo_data = cached_scrape_ipos()
     
     if isinstance(ipo_data, str):
@@ -150,11 +150,10 @@ elif page == "IPO Center":
             selected_title = st.selectbox(translate_text("Select an IPO for In-Depth AI Analysis:", lang_code), options=ipo_data['title'].tolist())
             if selected_title:
                 selected_row = ipo_data[ipo_data['title'] == selected_title].iloc[0]
-                
                 st.session_state.current_context = {'type': 'IPO', 'title': selected_title, 'data': selected_row['content']}
                 
                 st.subheader(f"{translate_text('In-Depth Analysis for', lang_code)}: {selected_title}")
-                with st.spinner(translate_text("AI is reading the full article and generating insights...", lang_code)):
+                with st.spinner(translate_text("AI reading full article and generating insights...", lang_code)):
                     ipo_analysis = get_in_depth_ipo_analysis(selected_title, selected_row['content'])
                     st.markdown(translate_text(ipo_analysis, lang_code))
                     with st.expander(translate_text("View Raw Article Text Scraped by AI", lang_code)):
@@ -162,7 +161,7 @@ elif page == "IPO Center":
 
 elif page == "Stock Analysis":
     st.title(translate_text("Stock Analysis", lang_code))
-    st.text(translate_text("Search for any company listed on NEPSE to get a detailed AI-powered analysis.", lang_code))
+    st.text(translate_text("Search any company listed on NEPSE", lang_code))
     
     company_df = cached_get_all_companies()
     if isinstance(company_df, dict) and "error" in company_df:
@@ -171,14 +170,14 @@ elif page == "Stock Analysis":
         company_symbols = company_df['symbol'].tolist()
         selected_symbol = st.selectbox(
             translate_text("Type or select a company symbol:", lang_code),
-            options=company_symbols, index=None, placeholder=translate_text("Search for a symbol like 'NABIL', 'HDL'...", lang_code)
+            options=company_symbols, index=None, placeholder=translate_text("Search like 'NABIL', 'HDL'...", lang_code)
         )
         if selected_symbol:
             st.subheader(f"{translate_text('Analysis for', lang_code)} {selected_symbol}")
-            with st.spinner(translate_text(f"Fetching and analyzing data for {selected_symbol}...", lang_code)):
+            with st.spinner(translate_text(f"Fetching + analyzing data for {selected_symbol}...", lang_code)):
                 details = cached_get_company_details(selected_symbol)
                 if isinstance(details, dict) and "error" in details:
-                    st.error(translate_text(f"Could not fetch details for {selected_symbol}: {details['error']}", lang_code))
+                    st.error(translate_text(f"Could not fetch details: {details['error']}", lang_code))
                 else:
                     details_str = json.dumps(details, indent=2)
                     st.session_state.current_context = {'type': 'Stock', 'symbol': selected_symbol, 'data': details_str}
@@ -194,16 +193,16 @@ elif page == "AI Chat Assistant":
     if st.session_state.current_context:
         context_type = st.session_state.current_context.get('type', 'N/A')
         context_name = st.session_state.current_context.get('title') or st.session_state.current_context.get('symbol')
-        st.info(f"**{translate_text('Context Loaded', lang_code)}:** {context_type} - {context_name}\n\n{translate_text('The AI will use the full data for this item in its answers.', lang_code)}")
+        st.info(f"**{translate_text('Context Loaded', lang_code)}:** {context_type} - {context_name}\n\n{translate_text('AI will use full data for this item.', lang_code)}")
     else:
-        st.info(translate_text("No specific context set. Feel free to ask general questions about the Nepali share market.\n To select specific context, go to IPO center and select the specific topic and then again come to this section.", lang_code))
+        st.info(translate_text("No context loaded. Ask general questions or go to IPO/Stock section to load one.", lang_code))
 
     st.warning(f"**{translate_text('Rate Limit', lang_code)}:** {translate_text('2 messages per minute', lang_code)}")
     
     for message in st.session_state.messages:
         with st.chat_message(message["role"]): st.markdown(message["content"])
 
-    if prompt := st.chat_input(translate_text("Ask a specific question about the context...", lang_code)):
+    if prompt := st.chat_input(translate_text("Ask a question...", lang_code)):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.markdown(prompt)
 
@@ -215,12 +214,12 @@ elif page == "AI Chat Assistant":
         
         if allow_query:
             with st.chat_message("assistant"):
-                with st.spinner(translate_text("Analyzing data and thinking...", lang_code)):
+                with st.spinner(translate_text("AI analyzing...", lang_code)):
                     response = get_chat_response(prompt, context=st.session_state.current_context)
                     translated_response = translate_text(response, lang_code)
                     st.markdown(translated_response)
                     st.session_state.messages.append({"role": "assistant", "content": translated_response})
         else:
-            error_message = translate_text("Rate limit exceeded. Please wait a minute before sending another message.", lang_code)
+            error_message = translate_text("Rate limit exceeded. Wait a bit.", lang_code)
             with st.chat_message("assistant"): st.error(error_message)
             st.session_state.messages.append({"role": "assistant", "content": error_message})
