@@ -21,7 +21,7 @@ def generate_response(prompt):
     """
     try:
         completion = groq_client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct", # Ensure this model is correct and available
+            model="meta-llama/llama-4-scout-17b-16e-instruct", # model can be changed 
             messages=[
                 {"role": "user", "content": prompt}
             ],
