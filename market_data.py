@@ -1,4 +1,3 @@
-# market_data.py
 import pandas as pd
 from nepse import Nepse
 
