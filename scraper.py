@@ -50,8 +50,8 @@ def scrape_upcoming_ipos():
 
     ipo_data = []
     
-    # --- Limiting to the first 5 articles to keep scraping fast and efficient ---
-    for article_div in articles_list[:5]:
+    # --- Limiting to the first 12 articles to provide more IPO data while keeping scraping efficient ---
+    for article_div in articles_list[:12]:
         title_tag = article_div.find('h4', class_='featured-news-title')
         link_tag = article_div.find('a')
         date_tag = article_div.find('span', class_='text-org')
