@@ -21,7 +21,6 @@ def generate_response(prompt):
         response = client.models.generate_content(
             model="gemini-2.5-flash",  # Using Gemini 2.5 Flash, can be changed to other versions like gemini-2.5-pro
             contents=prompt
-            }
         )
         return response.text
     except Exception as e:
