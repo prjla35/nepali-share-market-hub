@@ -1,34 +1,32 @@
 # llm_client.py
 import os
-from groq import Groq
+import google.generativeai as genai
 
 # --- IMPORTANT ---
 # Do NOT hardcode API keys. Use environment variables for security.
-# The API key will be read from the environment variable named 'GROQ_API_KEY'.
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+# The API key will be read from the environment variable named 'GEMINI_API_KEY'.
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-if GROQ_API_KEY is None:
-    raise ValueError("GROQ_API_KEY environment variable not set. Please set it securely.")
+if GEMINI_API_KEY is None:
+    raise ValueError("GEMINI_API_KEY environment variable not set. Please set it securely.")
 
-# Setup for Groq
-groq_client = Groq(
-    api_key=GROQ_API_KEY,
-)
+# Setup for Gemini
+genai.configure(api_key=GEMINI_API_KEY)
+gemini_model = genai.GenerativeModel('gemini-1.5-flash')
 
 def generate_response(prompt):
     """
-    Generates a response from the Groq LLaMA model.
+    Generates a response from the Gemini model.
     """
     try:
-        completion = groq_client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct", # model can be changed 
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_completion_tokens=1024,
-            top_p=1
+        response = gemini_model.generate_content(
+            prompt,
+            generation_config=genai.types.GenerationConfig(
+                temperature=0.7,
+                max_output_tokens=1024,
+                top_p=1
+            )
         )
-        return completion.choices[0].message.content
+        return response.text
     except Exception as e:
         return f"An error occurred with the LLM API: {e}"
