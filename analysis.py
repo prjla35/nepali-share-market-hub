@@ -5,8 +5,8 @@ import pandas as pd
 def get_in_depth_ipo_analysis(ipo_title, ipo_content):
     """
     Analyzes the full content of an IPO article.
-    It intelligently decides whether to provide a detailed "INSIGHT" report (for upcoming IPOs)
-    or a general summary (for other news).
+  And intelligently decides whether to provide a detailed  report (for upcoming IPOs)
+    or a general summary (for other news) if the topic is not about coming ipos but about updates of previous ipos.
     """
     prompt = f"""
     You are an expert financial analyst for the Nepal stock market (NEPSE).
@@ -21,8 +21,8 @@ def get_in_depth_ipo_analysis(ipo_title, ipo_content):
 
     **Instructions:**
     1.  First, carefully read the title and content to determine if this article is announcing a **new, upcoming IPO for the general public**.
-    2.  **If it IS an upcoming IPO announcement**, you MUST generate the detailed "INSIGHT" report using the exact format below.
-    3.  **If it is NOT an upcoming IPO** (e.g., it's news about right shares, an auction, a past IPO result, etc.), then simply write a concise, one-paragraph summary of the news and **DO NOT** generate the "INSIGHT" report.
+    2.  **If it IS an upcoming IPO announcement**, you MUST generate the detailed insight and complete guidance and informatic report using the exact format below.
+    3.  **If it is NOT an upcoming IPO** (e.g., it's news about right shares, an auction, a past IPO result, etc.), then simply write a concise, one-paragraph summary of the news and generate interactive beginner friendly report.
 
     ---
     **"INSIGHT" Report Format (Only use for upcoming IPOs):**
@@ -90,7 +90,7 @@ def get_market_summary_from_data(gainers_df, losers_df, turnover_df):
     Analyzes market data DataFrames to produce a daily market briefing.
     """
     prompt = f"""
-    You are a stock market analyst for NEPSE. Based on the following data, provide a "Daily Market Insight" summary in markdown.
+    You are a stock market analyst for NEPSE. Based on the following data, provide a "Daily Market Insight" summary in markdown. And donot mention anything about date in topic or saying something like "insert date" etc are strongly prohibited.
 
     Top 5 Gainers:
     {gainers_df.head().to_string()}
