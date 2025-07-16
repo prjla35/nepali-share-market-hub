@@ -40,7 +40,7 @@ This tool is designed for both beginners and experienced investors, consolidatin
 - **Framework:** Streamlit
 - **Language:** Python 3.11+
 - **Web Scraping:** requests, BeautifulSoup4
-- **Large Language Model (LLM):** Groq (for AI analysis and chat)
+- **Large Language Model (LLM):** Gemini [google genai] (for AI analysis and chat)
 - **NEPSE Data:** nepse-unofficial-api for live market data
 - **Data Handling:** pandas
 - **Translation:** deep-translator
@@ -60,7 +60,7 @@ pip install -r requirements.txt
 ```
 ### 3. Configure API keys
 ```bash
-GROQ_API_KEY="API KEY"
+GEMINI_API_KEY="API KEY"
 ```
 ### 4. Running the program
 ```bash
@@ -73,7 +73,7 @@ streamlit run app.py
 ├── scraper.py       # Scrapes IPO news and full article content from ShareSansar
 ├── market_data.py   # Fetches live market data from the NEPSE Unofficial API
 ├── analysis.py      # Contains all prompts and functions for LLM-based analysis
-├── llm_client.py    # Configures and handles the connection to the Groq API
+├── llm_client.py    # Configures and handles the connection to the Gemini API
 ├── requirements.txt # Lists all Python dependencies for the project
 ```
 
