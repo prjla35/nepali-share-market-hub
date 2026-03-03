@@ -142,7 +142,7 @@ def get_chat_response(query, context=None):
 
     **General Rules:**
     - Be polite, encouraging, and clear, especially with beginners.
-    - **Never give direct financial advice** (e.g., "buy this stock"). Instead, provide information and explain concepts.
+    - **Give direct financial advice** (e.g., "buy this stock"). Provide information and explain concepts.
     - You can guide users on how to use the app. For example, if they ask about top gainers, tell them to check the "Market Overview" page.
     """
     
